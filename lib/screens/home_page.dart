@@ -1,4 +1,3 @@
-
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
@@ -49,6 +48,14 @@ class _HomePageState extends State<HomePage> {
   }
 
   getWeatherData([String? city]) async {
+    if (city != null && city.isEmpty) {
+      // Show an error or ignore the search request if the city is empty
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please enter a valid city name')),
+      );
+      return;
+    }
+
     var weatherUrl;
     var forecastUrl;
     if (city == null) {
@@ -63,13 +70,25 @@ class _HomePageState extends State<HomePage> {
       "https://api.openweathermap.org/data/2.5/forecast?q=$city&appid=d17d902923ebc9bb3573f9267534a774&units=metric";
     }
 
-    var weather = await http.get(Uri.parse(weatherUrl));
-    var forecast = await http.get(Uri.parse(forecastUrl));
+    try {
+      var weather = await http.get(Uri.parse(weatherUrl));
+      var forecast = await http.get(Uri.parse(forecastUrl));
 
-    setState(() {
-      weatherMap = Map<String, dynamic>.from(jsonDecode(weather.body));
-      forecastMap = Map<String, dynamic>.from(jsonDecode(forecast.body));
-    });
+      if (weather.statusCode == 200 && forecast.statusCode == 200) {
+        setState(() {
+          weatherMap = Map<String, dynamic>.from(jsonDecode(weather.body));
+          forecastMap = Map<String, dynamic>.from(jsonDecode(forecast.body));
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not fetch weather data for the location.')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error fetching weather data.')),
+      );
+    }
   }
 
   @override
@@ -80,7 +99,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    var temp = weatherMap?['main']['temp'];
+    var temp = weatherMap?['main']?['temp'];
     if (temp != null) {
       temp = temp.toInt();
     }
