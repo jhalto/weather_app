@@ -5,7 +5,6 @@ import 'package:http/http.dart' as http;
 import 'package:jiffy/jiffy.dart';
 import 'package:weather_app_2/screens/forecast.dart';
 import 'package:weather_app_2/screens/weather_details.dart';
-import 'package:weather_app_2/widgets/common_widgets.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
